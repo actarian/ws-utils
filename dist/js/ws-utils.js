@@ -119,46 +119,391 @@ app.directive('animate', ['$timeout', function($timeout) {
 
 /**
    * @ngdoc directive
-   * @name validateType
+   * @name scrollable
    * @kind function
-   * @requires ngModel
    *
    * @description
-   * Custom validation type for ngModel
+   * Scrollable div 3d accellerated with touch functionality and callbacks for infinite scroll
    *
-   * @param {string} [validateType=number] the type of custom validation
+   * @param {promise} [on-top] optional callback function that execute when reaching top
+   * @param {promise} [on-bottom] optional callback function that execute when reaching bottom
+   *
+   * @example
+   <example module="examples">
+      <file name="index.html">
+         <div ng-controller="TestCtrl">
+            <section class="scrollable content" scrollable on-top="$root.doRefresh()">
+               <div class="inner">
+                  <ul>
+                     <li ng-repeat="item in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]">item <span ng-bind="item"></span></li>
+                  </ul>
+               </div>
+            </section>
+         </div>
+      </file>
+      <file name="script.js">
+         angular.module('examples', ['wsUtils']);
+         angular.controller('TestCtrl', ['$scope', '$q', function($scope, $q) {
+            $scope.doRefresh = function() {
+               var deferred = $q.defer();
+               if ($scope.busy) {
+                  deferred.reject();
+               } else {
+                  $scope.busy = true;
+                  $timeout(function() {
+                     $scope.busy = false;
+                     deferred.resolve();
+                  }, 500);
+               }
+               return deferred.promise;
+            };
+         }]);
+      </file>
+      <file name="style.css">
+         .scrollable.content {
+            height: 200px!important;
+         }
+      </file>
+   </example>
+*/
+app.directive('scrollable', ['$parse', '$compile', '$window', '$timeout', 'Utils', function($parse, $compile, $window, $timeout, Utils) {
+   return {
+      restrict: 'A',
+      link: function(scope, element, attributes, model) {
+         $window.ondragstart = function() { return false; };
+         // CONSTS;
+         var padding = 150;
+         // FLAGS;
+         var dragging, wheeling, busy;
+         // MOUSE;
+         var down, move, prev, up;
+         // COORDS;
+         var sy = 0, ey = 0, cy = 0, ltop = 0, lbottom = 0, speed = 0, ix = 45, iy = 0;
+         // ANIMATION KEY;
+         var aKey;
+         var onTop, onBottom, showIndicatorFor;
+         if (attributes.onTop !== undefined) {
+            onTop = $parse(attributes.onTop, /* interceptorFn */ null, /* expensiveChecks */ true);
+         }
+         if (attributes.onBottom !== undefined) {
+            onBottom = $parse(attributes.onBottom, /* interceptorFn */ null, /* expensiveChecks */ true);
+         }
+         if (attributes.showIndicatorFor !== undefined) {
+            showIndicatorFor = scope.$eval(attributes.showIndicatorFor); // $parse(attributes.showIndicatorFor, /* interceptorFn */ null, /* expensiveChecks */ true);
+         }
+         // console.log('showIndicatorFor', showIndicatorFor);
+         // ELEMENTS & STYLESHEETS;
+         element.attr('unselectable', 'on').addClass('unselectable');
+         var inner = element.find('div');
+         var innerStyle = new Utils.Style();
+         var indicator = null, indicatorStyle;
+         if (showIndicatorFor) {
+            indicator = angular.element('<div class="indicator"></div>');
+            indicatorStyle = new Utils.Style();
+            element.append(indicator);
+            $compile(indicator.contents())(scope);
+            indicatorStyle.transform('translate3d(' + ix.toFixed(2) + 'px,' + iy.toFixed(2) + 'px,0)');
+            indicatorStyle.set(indicator[0]);
+         }
+         function doTop() {
+            if (busy) {
+               return;
+            }
+            if (!onTop) {
+               return;
+            }
+            busy = true;
+            scope.$apply(onTop).then().finally(function() {
+               sy = ey = 0;
+               setTimeout(function() {
+                  undrag();
+                  busy = false;
+               }, 500);
+            });
+         }
+         function doBottom() {
+            if (busy) {
+               return;
+            }
+            if (!onBottom) {
+               return;
+            }
+            busy = true;
+            scope.$apply(onBottom).then().finally(function() {
+               var lbottom2 = element[0].offsetHeight - inner[0].offsetHeight;
+               if (lbottom2 > lbottom) {
+                  sy = ey = lbottom;
+               } else {
+                  sy = ey = lbottom + padding;
+               }
+               setTimeout(function() {
+                  undrag();
+                  busy = false;
+               }, 500);
+            });
+         }
+         function undrag() {
+            // console.log('undrag');
+            dragging = false;
+            wheeling = false;
+            move = null;
+            down = null;
+            removeDragListeners();
+         }
+         function bounce() {
+            ltop += padding;
+            lbottom -= padding;
+            if (ey > ltop) {
+               doTop();
+            } else if (ey < lbottom) {
+               doBottom();
+            }
+         }
+         function redraw(time) {
+            // if (!busy) {
+            ltop = 0;
+            lbottom = element[0].offsetHeight - inner[0].offsetHeight;
+            if (dragging) {
+               ey = sy + move.y - down.y;
+               bounce();
+            } else if (speed) {
+               ey += speed;
+               speed *= .75;
+               if (wheeling) {
+                  bounce();
+               }
+               if (Math.abs(speed) < 0.05) {
+                  speed = 0;
+                  ey = sy = cy;
+                  wheeling = false;
+                  pause();
+               }
+            }
+            // }
+            ey = Math.min(ltop, ey);
+            ey = Math.max(lbottom, ey);
+            cy += (ey - cy) / 4;
+            innerStyle.transform('translate3d(0,' + cy.toFixed(2) + 'px,0)');
+            innerStyle.set(inner[0]);
+            if (showIndicatorFor) {
+               if (dragging || wheeling || speed) {
+                  var percent = cy / (element[0].offsetHeight - inner[0].offsetHeight);
+                  percent = Math.max(0, Math.min(1, percent));
+                  iy = (element[0].offsetHeight - indicator[0].offsetHeight) * (percent);
+                  ix += (0 - ix) / 4;
+                  // var count = Math.round(inner[0].offsetHeight / 315);
+                  var i = Math.max(1, Math.round(percent * showIndicatorFor.rows.length));
+                  indicator.html(i + '/' + showIndicatorFor.count);
+                  // indicator.html((percent * 100).toFixed(2).toString());
+               } else {
+                  ix += (45 - ix) / 4;
+               }
+               indicatorStyle.transform('translate3d(' + ix.toFixed(2) + 'px,' + iy.toFixed(2) + 'px,0)');
+               indicatorStyle.set(indicator[0]);
+            }
+         }
+         function play() {
+            function loop(time) {
+               redraw(time);
+               aKey = window.requestAnimationFrame(loop, element);
+            }
+            if (!aKey) {
+               loop();
+            }
+         }
+         function pause() {
+            if (aKey) {
+               window.cancelAnimationFrame(aKey);
+               aKey = null;
+               // console.log('Animation.paused');
+            }
+         }
+         function onDown(e) {
+            if (!busy) {
+               sy = ey = cy;
+               speed = 0;
+               down = Utils.getTouch(e);
+               wheeling = false;
+               // console.log(down);
+               addDragListeners();
+               play();
+            }
+         }
+         function onMove(e) {
+            prev = move;
+            move = Utils.getTouch(e);
+            dragging = true;
+            // console.log(move);
+         }
+         function onUp(e) {
+            if (move && prev) {
+               speed += (move.y - prev.y) * 4;
+            }
+            sy = ey = cy;
+            dragging = false;
+            move = null;
+            down = null;
+            prev = null;
+            up = Utils.getTouch(e);
+            // console.log(up);
+            removeDragListeners();
+         }
+         function _onWheel(e) {
+            if (!busy) {
+               if (!e) e = event;
+               var dir = (((e.deltaY < 0 || e.wheelDelta > 0) || e.deltaY < 0) ? 1 : -1)
+               /*
+               var evt = window.event || e;
+               var delta = evt.detail ? evt.detail * -120 : evt.wheelDelta
+               speed += delta;
+               */
+               speed += dir * 5;
+               wheeling = true;
+               play();
+            }
+         }
+         var onWheel = Utils.throttle(_onWheel, 25);
+         function addListeners() {
+            element.on('touchstart mousedown', onDown);
+            element.on('wheel', onWheel);
+            // element.addEventListener('DOMMouseScroll',handleScroll,false); // for Firefox
+            // element.addEventListener('mousewheel',    handleScroll,false); // for everyone else
+         };
+         function removeListeners() {
+            element.off('touchstart mousedown', onDown);
+            element.off('wheel', onWheel);
+         };
+         function addDragListeners() {
+            angular.element($window).on('touchmove mousemove', onMove);
+            angular.element($window).on('touchend mouseup', onUp);
+         };
+         function removeDragListeners() {
+            angular.element($window).off('touchmove mousemove', onMove);
+            angular.element($window).off('touchend mouseup', onUp);
+         };
+         scope.$on('$destroy', function() {
+            removeListeners();
+         });
+         addListeners();
+      },
+   };
+}]);
+
+/**
+   * @ngdoc directive
+   * @name ngImg
+   * @kind function
+   *
+   * @description
+   * Whenever the image has loaded, a loaded class will be added to the image element
+   *
+   * @param {string} ng-img path to the image to load
+   *
+   * @example
+   <example module="examples">
+      <file name="index.html">
+         <img src="" ng-img="'/img/nature-01.jpg'"/>
+      </file>
+      <file name="script.js">
+         angular.module('examples', ['wsUtils']);
+      </file>
+      <file name="style.css">
+         [ng-img] {
+            max-width: 100%;
+            opacity: 0;
+            transition: opacity ease-in-out 250ms;
+         }
+         [ng-img].loaded {
+            opacity: 1;
+         }
+      </file>
+   </example>
+*/
+app.directive('ngImg', ['$parse', '$timeout', function($parse, $timeout) {
+   return {
+      restrict: 'A',
+      link: function(scope, element, attributes, model) {
+         var src = $parse(attributes.ngImg, /* interceptorFn */ null, /* expensiveChecks */ true);
+         var image = new Image();
+         image.onload = function() {
+            attributes.$set('src', this.src);
+            setTimeout(function() {
+               element.addClass('loaded');
+            }, 10);
+         }
+         image.load = function(src) {
+            element.removeClass('loaded');
+            this.src = src;
+         }
+         scope.$watch(src, function(newValue) {
+            if (!newValue) {
+               attributes.$set('src', null);
+            } else {
+               image.load(newValue);
+            }
+         });
+      }
+   };
+}]);
+
+/**
+   * @ngdoc directive
+   * @name ngImgWorker
+   * @kind function
+   *
+   * @description
+   * As ngImg but using webworker. Whenever the image has loaded, a loaded class will be added to the image element
+   *
+   * @param {string} ng-img path to the image to load
    *
    * @example
 	<example module="examples">
-		<file name="index.html">
-			<form name="myForm">
-				<input name="myValue" type="text" ng-model="model" validate-type="number" />
-				<span ng-messages="(myForm.$submitted || myForm.$touched) && myForm.myValue.$error" role="alert">
-					<span ng-message="number" class="label-error animated flash"> &larr; enter a valid number</span>
-				</span>
-			</form>
-		</file>
-		<file name="script.js">
-			angular.module('examples', ['wsUtils']);
-		</file>
+      <file name="index.html">
+         <img src="" ng-img-worker="'/img/nature-02.jpg'"/>
+      </file>
+      <file name="script.js">
+         angular.module('examples', ['wsUtils']);
+      </file>
+      <file name="style.css">
+         [ng-img] {
+            max-width: 100%;
+            opacity: 0;
+            transition: opacity ease-in-out 250ms;
+         }
+         [ng-img].loaded {
+            opacity: 1;
+         }
+      </file>
 	</example>
 */
-app.directive('validateType', function() {
+app.directive('ngImgWorker', ['$parse', 'WebWorker', function($parse, WebWorker) {
+   var worker = new WebWorker('/js/ws-utils/workers/loader.js');
    return {
-      require: 'ngModel',
+      restrict: 'A',
       link: function(scope, element, attributes, model) {
-         var type = attributes.validateType;
-         switch (type) {
-            case 'number':
-               model.$parsers.unshift(function(value) {
-                  model.$setValidity(type, String(value).indexOf(Number(value).toString()) !== -1);
-                  return value;
-               });
-               break;
+         function doWork(src) {
+            element.removeClass('loaded');
+            function onImageLoaded(src) {
+               attributes.$set('src', src);
+               setTimeout(function() {
+                  element.addClass('loaded');
+               }, 100);
+            }
+            worker.post({ url: src }).then(function(data) {
+               onImageLoaded(data.url);
+            }, function(error) {
+               onImageLoaded(null);
+            });
+         }
+         var src = scope.$eval(attributes.ngImgWorker);
+         if (!src) {
+            attributes.$set('src', null);
+         } else {
+            doWork(src);
          }
       }
    };
-});
+}]);
 
 /**
    * @ngdoc directive
@@ -587,389 +932,46 @@ app.directive('controlAutocomplete', ['$parse', '$window', '$timeout', function(
 
 /**
    * @ngdoc directive
-   * @name scrollable
+   * @name validateType
    * @kind function
+   * @requires ngModel
    *
    * @description
-   * Scrollable div 3d accellerated with touch functionality and callbacks for infinite scroll
+   * Custom validation type for ngModel
    *
-   * @param {promise} [on-top] optional callback function that execute when reaching top
-   * @param {promise} [on-bottom] optional callback function that execute when reaching bottom
-   *
-   * @example
-   <example module="examples">
-      <file name="index.html">
-         <section class="scrollable content" scrollable on-top="doRefresh()">
-            <div class="inner">
-               <ul>
-                  <li ng-repeat="item in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]">item <span ng-bind="item"></span></li>
-               </ul>
-            </div>
-         </section>
-      </file>
-      <file name="script.js">
-         angular.module('examples', ['wsUtils']);
-         angular.run(['$rootScope', '$q', function($rootScope, $q) {
-            $rootScope.doRefresh = function() {
-               var deferred = $q.defer();
-               if ($rootScope.busy) {
-                  deferred.reject();
-               } else {
-                  $rootScope.busy = true;
-                  $timeout(function() {
-                     $rootScope.busy = false;
-                     deferred.resolve();
-                  }, 500);
-               }
-               return deferred.promise;
-            };
-         }]);
-      </file>
-      <file name="style.css">
-         .scrollable.content {
-            height: 200px!important;
-         }
-      </file>
-   </example>
-*/
-app.directive('scrollable', ['$parse', '$compile', '$window', '$timeout', 'Utils', function($parse, $compile, $window, $timeout, Utils) {
-   return {
-      restrict: 'A',
-      link: function(scope, element, attributes, model) {
-         $window.ondragstart = function() { return false; };
-         // CONSTS;
-         var padding = 150;
-         // FLAGS;
-         var dragging, wheeling, busy;
-         // MOUSE;
-         var down, move, prev, up;
-         // COORDS;
-         var sy = 0, ey = 0, cy = 0, ltop = 0, lbottom = 0, speed = 0, ix = 45, iy = 0;
-         // ANIMATION KEY;
-         var aKey;
-         var onTop, onBottom, showIndicatorFor;
-         if (attributes.onTop !== undefined) {
-            onTop = $parse(attributes.onTop, /* interceptorFn */ null, /* expensiveChecks */ true);
-         }
-         if (attributes.onBottom !== undefined) {
-            onBottom = $parse(attributes.onBottom, /* interceptorFn */ null, /* expensiveChecks */ true);
-         }
-         if (attributes.showIndicatorFor !== undefined) {
-            showIndicatorFor = scope.$eval(attributes.showIndicatorFor); // $parse(attributes.showIndicatorFor, /* interceptorFn */ null, /* expensiveChecks */ true);
-         }
-         // console.log('showIndicatorFor', showIndicatorFor);
-         // ELEMENTS & STYLESHEETS;
-         element.attr('unselectable', 'on').addClass('unselectable');
-         var inner = element.find('div');
-         var innerStyle = new Utils.Style();
-         var indicator = null, indicatorStyle;
-         if (showIndicatorFor) {
-            indicator = angular.element('<div class="indicator"></div>');
-            indicatorStyle = new Utils.Style();
-            element.append(indicator);
-            $compile(indicator.contents())(scope);
-            indicatorStyle.transform('translate3d(' + ix.toFixed(2) + 'px,' + iy.toFixed(2) + 'px,0)');
-            indicatorStyle.set(indicator[0]);
-         }
-         function doTop() {
-            if (busy) {
-               return;
-            }
-            if (!onTop) {
-               return;
-            }
-            busy = true;
-            scope.$apply(onTop).then().finally(function() {
-               sy = ey = 0;
-               setTimeout(function() {
-                  undrag();
-                  busy = false;
-               }, 500);
-            });
-         }
-         function doBottom() {
-            if (busy) {
-               return;
-            }
-            if (!onBottom) {
-               return;
-            }
-            busy = true;
-            scope.$apply(onBottom).then().finally(function() {
-               var lbottom2 = element[0].offsetHeight - inner[0].offsetHeight;
-               if (lbottom2 > lbottom) {
-                  sy = ey = lbottom;
-               } else {
-                  sy = ey = lbottom + padding;
-               }
-               setTimeout(function() {
-                  undrag();
-                  busy = false;
-               }, 500);
-            });
-         }
-         function undrag() {
-            // console.log('undrag');
-            dragging = false;
-            wheeling = false;
-            move = null;
-            down = null;
-            removeDragListeners();
-         }
-         function bounce() {
-            ltop += padding;
-            lbottom -= padding;
-            if (ey > ltop) {
-               doTop();
-            } else if (ey < lbottom) {
-               doBottom();
-            }
-         }
-         function redraw(time) {
-            // if (!busy) {
-            ltop = 0;
-            lbottom = element[0].offsetHeight - inner[0].offsetHeight;
-            if (dragging) {
-               ey = sy + move.y - down.y;
-               bounce();
-            } else if (speed) {
-               ey += speed;
-               speed *= .75;
-               if (wheeling) {
-                  bounce();
-               }
-               if (Math.abs(speed) < 0.05) {
-                  speed = 0;
-                  ey = sy = cy;
-                  wheeling = false;
-                  pause();
-               }
-            }
-            // }
-            ey = Math.min(ltop, ey);
-            ey = Math.max(lbottom, ey);
-            cy += (ey - cy) / 4;
-            innerStyle.transform('translate3d(0,' + cy.toFixed(2) + 'px,0)');
-            innerStyle.set(inner[0]);
-            if (showIndicatorFor) {
-               if (dragging || wheeling || speed) {
-                  var percent = cy / (element[0].offsetHeight - inner[0].offsetHeight);
-                  percent = Math.max(0, Math.min(1, percent));
-                  iy = (element[0].offsetHeight - indicator[0].offsetHeight) * (percent);
-                  ix += (0 - ix) / 4;
-                  // var count = Math.round(inner[0].offsetHeight / 315);
-                  var i = Math.max(1, Math.round(percent * showIndicatorFor.rows.length));
-                  indicator.html(i + '/' + showIndicatorFor.count);
-                  // indicator.html((percent * 100).toFixed(2).toString());
-               } else {
-                  ix += (45 - ix) / 4;
-               }
-               indicatorStyle.transform('translate3d(' + ix.toFixed(2) + 'px,' + iy.toFixed(2) + 'px,0)');
-               indicatorStyle.set(indicator[0]);
-            }
-         }
-         function play() {
-            function loop(time) {
-               redraw(time);
-               aKey = window.requestAnimationFrame(loop, element);
-            }
-            if (!aKey) {
-               loop();
-            }
-         }
-         function pause() {
-            if (aKey) {
-               window.cancelAnimationFrame(aKey);
-               aKey = null;
-               // console.log('Animation.paused');
-            }
-         }
-         function onDown(e) {
-            if (!busy) {
-               sy = ey = cy;
-               speed = 0;
-               down = Utils.getTouch(e);
-               wheeling = false;
-               // console.log(down);
-               addDragListeners();
-               play();
-            }
-         }
-         function onMove(e) {
-            prev = move;
-            move = Utils.getTouch(e);
-            dragging = true;
-            // console.log(move);
-         }
-         function onUp(e) {
-            if (move && prev) {
-               speed += (move.y - prev.y) * 4;
-            }
-            sy = ey = cy;
-            dragging = false;
-            move = null;
-            down = null;
-            prev = null;
-            up = Utils.getTouch(e);
-            // console.log(up);
-            removeDragListeners();
-         }
-         function _onWheel(e) {
-            if (!busy) {
-               if (!e) e = event;
-               var dir = (((e.deltaY < 0 || e.wheelDelta > 0) || e.deltaY < 0) ? 1 : -1)
-               /*
-               var evt = window.event || e;
-               var delta = evt.detail ? evt.detail * -120 : evt.wheelDelta
-               speed += delta;
-               */
-               speed += dir * 5;
-               wheeling = true;
-               play();
-            }
-         }
-         var onWheel = Utils.throttle(_onWheel, 25);
-         function addListeners() {
-            element.on('touchstart mousedown', onDown);
-            element.on('wheel', onWheel);
-            // element.addEventListener('DOMMouseScroll',handleScroll,false); // for Firefox
-            // element.addEventListener('mousewheel',    handleScroll,false); // for everyone else
-         };
-         function removeListeners() {
-            element.off('touchstart mousedown', onDown);
-            element.off('wheel', onWheel);
-         };
-         function addDragListeners() {
-            angular.element($window).on('touchmove mousemove', onMove);
-            angular.element($window).on('touchend mouseup', onUp);
-         };
-         function removeDragListeners() {
-            angular.element($window).off('touchmove mousemove', onMove);
-            angular.element($window).off('touchend mouseup', onUp);
-         };
-         scope.$on('$destroy', function() {
-            removeListeners();
-         });
-         addListeners();
-      },
-   };
-}]);
-
-/**
-   * @ngdoc directive
-   * @name ngImg
-   * @kind function
-   *
-   * @description
-   * Whenever the image has loaded, a loaded class will be added to the image element
-   *
-   * @param {string} ng-img path to the image to load
-   *
-   * @example
-   <example module="examples">
-      <file name="index.html">
-         <img src="" ng-img="'/img/nature-01.jpg'"/>
-      </file>
-      <file name="script.js">
-         angular.module('examples', ['wsUtils']);
-      </file>
-      <file name="style.css">
-         [ng-img] {
-            max-width: 100%;
-            opacity: 0;
-            transition: opacity ease-in-out 250ms;
-         }
-         [ng-img].loaded {
-            opacity: 1;
-         }
-      </file>
-   </example>
-*/
-app.directive('ngImg', ['$parse', '$timeout', function($parse, $timeout) {
-   return {
-      restrict: 'A',
-      link: function(scope, element, attributes, model) {
-         var src = $parse(attributes.ngImg, /* interceptorFn */ null, /* expensiveChecks */ true);
-         var image = new Image();
-         image.onload = function() {
-            attributes.$set('src', this.src);
-            setTimeout(function() {
-               element.addClass('loaded');
-            }, 10);
-         }
-         image.load = function(src) {
-            element.removeClass('loaded');
-            this.src = src;
-         }
-         scope.$watch(src, function(newValue) {
-            if (!newValue) {
-               attributes.$set('src', null);
-            } else {
-               image.load(newValue);
-            }
-         });
-      }
-   };
-}]);
-
-/**
-   * @ngdoc directive
-   * @name ngImgWorker
-   * @kind function
-   *
-   * @description
-   * As ngImg but using webworker. Whenever the image has loaded, a loaded class will be added to the image element
-   *
-   * @param {string} ng-img path to the image to load
+   * @param {string} [validateType=number] the type of custom validation
    *
    * @example
 	<example module="examples">
-      <file name="index.html">
-         <img src="" ng-img-worker="'/img/nature-02.jpg'"/>
-      </file>
-      <file name="script.js">
-         angular.module('examples', ['wsUtils']);
-      </file>
-      <file name="style.css">
-         [ng-img] {
-            max-width: 100%;
-            opacity: 0;
-            transition: opacity ease-in-out 250ms;
-         }
-         [ng-img].loaded {
-            opacity: 1;
-         }
-      </file>
+		<file name="index.html">
+			<form name="myForm">
+				<input name="myValue" type="text" ng-model="model" validate-type="number" />
+				<span ng-messages="(myForm.$submitted || myForm.$touched) && myForm.myValue.$error" role="alert">
+					<span ng-message="number" class="label-error animated flash"> &larr; enter a valid number</span>
+				</span>
+			</form>
+		</file>
+		<file name="script.js">
+			angular.module('examples', ['wsUtils']);
+		</file>
 	</example>
 */
-app.directive('ngImgWorker', ['$parse', 'WebWorker', function($parse, WebWorker) {
-   var worker = new WebWorker('/js/ws-utils/workers/loader.js');
+app.directive('validateType', function() {
    return {
-      restrict: 'A',
+      require: 'ngModel',
       link: function(scope, element, attributes, model) {
-         function doWork(src) {
-            element.removeClass('loaded');
-            function onImageLoaded(src) {
-               attributes.$set('src', src);
-               setTimeout(function() {
-                  element.addClass('loaded');
-               }, 100);
-            }
-            worker.post({ url: src }).then(function(data) {
-               onImageLoaded(data.url);
-            }, function(error) {
-               onImageLoaded(null);
-            });
-         }
-         var src = scope.$eval(attributes.ngImgWorker);
-         if (!src) {
-            attributes.$set('src', null);
-         } else {
-            doWork(src);
+         var type = attributes.validateType;
+         switch (type) {
+            case 'number':
+               model.$parsers.unshift(function(value) {
+                  model.$setValidity(type, String(value).indexOf(Number(value).toString()) !== -1);
+                  return value;
+               });
+               break;
          }
       }
    };
-}]);
+});
 
 /*global angular*/
 

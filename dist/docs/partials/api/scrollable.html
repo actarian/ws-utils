@@ -20,13 +20,15 @@
 <div class="tabbable"><div class="tab-pane" title="index.html">
 <pre class="prettyprint linenums" ng-set-text="index.html-8" ng-html-wrap-loaded="examples angular.js script.js"></pre>
 <script type="text/ng-template" id="index.html-8">
-   <section class="scrollable content" scrollable on-top="doRefresh()">
-      <div class="inner">
-         <ul>
-            <li ng-repeat="item in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]">item <span ng-bind="item"></span></li>
-         </ul>
-      </div>
-   </section>
+   <div ng-controller="TestCtrl">
+      <section class="scrollable content" scrollable on-top="$root.doRefresh()">
+         <div class="inner">
+            <ul>
+               <li ng-repeat="item in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]">item <span ng-bind="item"></span></li>
+            </ul>
+         </div>
+      </section>
+   </div>
 </script>
 </div>
 <div class="tab-pane" title="style.css">
@@ -41,15 +43,15 @@
 <pre class="prettyprint linenums" ng-set-text="script.js-9"></pre>
 <script type="text/ng-template" id="script.js-9">
    angular.module('examples', ['wsUtils']);
-   angular.run(['$rootScope', '$q', function($rootScope, $q) {
-      $rootScope.doRefresh = function() {
+   angular.controller('TestCtrl', ['$scope', '$q', function($scope, $q) {
+      $scope.doRefresh = function() {
          var deferred = $q.defer();
-         if ($rootScope.busy) {
+         if ($scope.busy) {
             deferred.reject();
          } else {
-            $rootScope.busy = true;
+            $scope.busy = true;
             $timeout(function() {
-               $rootScope.busy = false;
+               $scope.busy = false;
                deferred.resolve();
             }, 500);
          }

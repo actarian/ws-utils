@@ -64,7 +64,7 @@ NG_DOCS={
       "type": "directive",
       "moduleName": "scrollable",
       "shortDescription": "Scrollable div 3d accellerated with touch functionality and callbacks for infinite scroll",
-      "keywords": "$q $rootscope $timeout accellerated angular api bottom busy callback callbacks class content css defer deferred directive div dorefresh examples execute false function functionality height html infinite inner item js module ng-bind ng-repeat on-top optional promise reaching reject resolve return script scroll scrollable style top touch true var wsutils"
+      "keywords": "$q $root $scope $timeout accellerated angular api bottom busy callback callbacks class content controller css defer deferred directive div dorefresh examples execute false function functionality height html infinite inner item js module ng-bind ng-controller ng-repeat on-top optional promise reaching reject resolve return script scroll scrollable style testctrl top touch true var wsutils"
     },
     {
       "section": "api",

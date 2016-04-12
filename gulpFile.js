@@ -235,7 +235,7 @@ bundles.js.forEach(function(bundle, i) {
 });
 gulp.task('js:bundles', jsbundles, function(done) { done(); });
 gulp.task('js:watch', function () {
-    var sources = [];
+    var sources = ['./config.json'];
     bundles.js.forEach(function (bundle, i) {
         bundle.src.forEach(function (src, i) {
             sources.push(src);
@@ -285,7 +285,7 @@ bundles.css.forEach(function(bundle, i) {
 });
 gulp.task('css:bundles', cssbundles, function(done) { done(); });
 gulp.task('css:watch', function() {
-    var sources = [];
+    var sources = ['./config.json'];
     bundles.css.forEach(function (bundle, i) {
         bundle.src.forEach(function (src, i) {
             sources.push(src);
