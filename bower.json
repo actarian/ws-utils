@@ -4,6 +4,5 @@
    "version": "0.0.1",
    "main": "./dist/js/ws-utils.js",
    "dependencies": {
-      "angular": "1.5.4-build.4739+sha.761c70c"
    }
 }
