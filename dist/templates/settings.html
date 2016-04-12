@@ -1,0 +1,30 @@
+<div class="inner user">
+    <section class="vertical header">
+        <div class="inner left">
+            <button type="button" class="btn btn-icon animated" animate="bounceIn" delay="300" ng-click="goUser(user.route)"><i class="icon-back"></i></button>
+        </div>
+        <div class="inner center">
+            <b ng-bind="user.userName"></b>
+        </div>
+        <div class="inner right">
+            &nbsp;                        
+        </div>
+    </section>
+    <section class="scrollable content" scrollable>
+        <div class="inner">
+            <div class="loader top"><span class="bounce infinite" ng-class="{ animated: source.busy }"></span></div>
+            <div class="card">
+                <div class="card-media aspect ratio2x1">
+                    <img src="" ng-img="user.picture('md')" class="inner blurred" />
+                    <span class="user" animate="bounceIn" delay="1000">                
+                        <span class="picture bounce infinite" ng-class="{ animated: source.logoutBusy }" style="{{user.backgroundPicture('md')}}"></span>
+                    </span>   
+                </div>
+            </div>  
+            <div class="divline"><span ng-bind="user.userName.toUpperCase() + ' SETTINGS'"></span></div>
+            <div class="container-fluid">
+                <button type="button" ng-class="{ busy: logoutBusy }" class="btn btn-primary btn-block" ng-click="signOut()"><span ng-if="!logoutBusy">SIGN OUT</span><span ng-if="logoutBusy">SIGNING OUT</span></button>
+            </div>                    
+        </div>
+    </section>
+</div>

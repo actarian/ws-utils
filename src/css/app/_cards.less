@@ -1,0 +1,135 @@
+
+@import "../_variables.less";
+@import "_mixins.less";
+
+@card-outer-padding: 0;
+@card-inner-padding: 5px 15px; 
+
+.card {
+    padding: @card-outer-padding;
+    box-sizing: border-box;
+    
+    .card-media {
+		display: inline-block;
+    	width: 100%;
+	    overflow: hidden;
+        background: #e0e0e0;
+        // .box-shadow();        
+        img {
+            width: 100%;
+            .opacity(0);
+            .transition-transform();
+            &.loaded {
+                .opacity(1);
+            }
+            &.blurred {
+                -webkit-filter: blur(20px);
+                filter: blur(20px);
+            }
+        }
+        & .user {
+            & .picture {
+                position: absolute;
+                width: 100px;
+                height: 100px;
+                border-radius: 50px;
+                top: 50%;
+                left: 50%;
+                margin: -50px 0 0 -50px;
+            }
+        }
+    }    
+	.card-content {
+		padding: @card-inner-padding;
+    }    
+	.card-headline, .card-body {
+		display: table;
+        width: 100%;
+        text-align: left;        
+        & > div {
+            display: table-cell;
+            &.left {
+                text-align: left;
+            }
+            &.right {
+                text-align: right;
+            }
+        }
+    }
+    .card-headline {		
+        padding-bottom: 10px;
+    	& > div {            
+            vertical-align: top;
+            &.right {
+                width: 40px;
+            }
+        }
+    }
+    .card-body {		
+        padding: 10px 0;
+    	& > div {            
+            vertical-align: middle;
+            &.right {
+                width: 115px;
+            }
+        }
+    }
+    .card-info {
+        font-size: 16px;
+        color: @gray-dark;
+        text-align: left;    
+    }          
+    .card-divline {
+        display: block;
+        position: relative;
+        width: 100%;
+        height: 4px;        
+        border-radius: 1px;
+        overflow: hidden;  
+        background: #e0e0e0;
+        & > .rating {
+            background: @brand-primary;
+            width: 100%;
+            height: 100%;
+            .transform(scale(0,1));
+            .transform-origin(0% 50%);
+            .transition-transform();            
+        }  
+    }
+    
+    /*
+    &:hover {
+        .card-media {
+            img {
+                .transform(scale(1.1,1.1));
+            }
+        }
+    }
+    */
+    
+    @icon-size: 30px;
+    
+    .icon-vegan-friendly {
+         
+        display: inline-block;
+        position: relative;
+        width: @icon-size;
+        height: @icon-size;
+        line-height: @icon-size;
+        border-radius: @icon-size / 2;
+        margin: 0;
+        padding: 0;
+        border: none;
+        white-space: nowrap;
+        overflow: hidden;        
+        font-size: @icon-size;
+        margin-right: 10px;
+        vertical-align: middle;
+        color: @brand-primary;
+        background: #f8f8f8;
+        &:before {
+            vertical-align: middle;
+        }
+    }
+    
+}

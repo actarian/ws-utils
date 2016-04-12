@@ -1,0 +1,67 @@
+<div class="inner stream">
+    <section class="vertical header">
+        <div class="inner left">
+            <div class="logo sm" animate="bounceIn" delay="500" ng-click="goStream()">            
+                <img src="/img/logo_ullo_1.png" class="bounce infinite" ng-class="{ animated: source.busy }" />
+            </div>
+        </div>
+        <div class="inner center">
+            &nbsp;
+        </div>
+        <div class="inner right">
+            <span class="user" animate="bounceIn" delay="1000">    
+                <span class="picture" style="{{Users.currentUser().backgroundPicture()}}" ng-click="goUser(Users.currentUser().route)"></span>
+            </span>                 
+        </div>
+    </section>
+    <section class="scrollable content" scrollable on-top="source.refresh()" on-bottom="source.more()" show-indicator-for="source">
+        <div class="inner">
+            <div class="loader top"><span class="bounce infinite" ng-class="{ animated: source.busy }"></span></div>
+            <div ng-repeat="item in source.rows">
+                <div class="card">
+                    <div class="card-media aspect ratio2x1" ng-click="goDish(item.dish.id)">
+                        <img src="" ng-img-worker="getPicture(item)" class="inner" />
+                    </div>
+                    <div class="card-content">
+                        <div class="card-headline h5" ng-click="goDish(item.dish.id)">
+                            <div class="left">
+                                <b class="text-strong" ng-bind="item.dish.name"></b>  
+                                <span class="price" ng-bind="item.dish.price | currency : '€'"></span>
+                            </div>
+                            <div class="right">
+                                <b class="rating" ng-bind="item.dish.ratingToString()"></b>                         
+                            </div>
+                        </div>                        
+                        <div class="card-info">
+                            <b ng-repeat="category in item.dish.categories" ng-click="goCategory(category.id)"><span ng-bind="category.name"></span>{{$last ? "" : ", "}}</b>
+                            <span class="pull-right" ng-bind="item.created | relativeDate"></span>
+                        </div>                                
+                        <div class="card-divline">
+                            <div class="rating" style="transform: scale({{item.dish.rating()}}, 1);"></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="left">
+                                <span class="user" ng-click="goUser(item.user.route)">
+                                    <span class="picture" style="{{item.user.backgroundPicture()}}"></span>
+                                    <span class="name" ng-bind="item.user.userName"></span>
+                                </span>                         
+                            </div>
+                            <div class="right">                                                          
+                                <i class="icon-vegan-friendly" ng-if="item.dish.isVeganFriendly" title="is vegan friendly"></i>
+                                <button type="button" ng-click="item.dish.like(true)" ng-class="{ active: item.dish.vote.like === true }" on-tap class="btn btn-vote btn-upvote" title="vote up"><i class="icon-upvote"></i><span ng-bind="item.dish.yes"></span></button>
+                                <button type="button" ng-click="item.dish.like(false)" ng-class="{ active: item.dish.vote.like === false }"  on-tap class="btn btn-vote btn-downvote" title="vote down"><span ng-bind="item.dish.no"></span><i class="icon-downvote"></i></button>                         
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="loader bottom" ng-if="source.busy"><span class="bounce infinite animated" ng-class="{ animate: source.busy }"></span></div> -->
+        </div>
+    </section>
+    <section class="vertical footer">
+        <div class="inner">
+            <!-- <button type="button" ng-click="goPost()" on-tap class="btn btn-add"><i class="icon-plus"></i></button> -->          
+            <button type="button" on-tap class="btn btn-add" ngf-select="onUploadFileSelected($file, $newFiles)" ngf-capture="'camera'" ngf-accept="'image/*'" ngf-fix-orientation="true" ngf-no-object-url="true" ngf-resize="{width: 750, height: 375, quality: 0.9, type:'image/jpeg', centerCrop: true}" title="Add or change picture"><i class="icon-plus"></i></button>   
+        </div>
+    </section>
+</div>

@@ -1,0 +1,38 @@
+body {
+  background: white;
+  font-family: monospace;
+  font-size: 11px;
+}
+.navbar-static-top .container,
+.navbar-fixed-top .container,
+.navbar-fixed-bottom .container {
+  width: 1200px;
+}
+.container,
+.navbar-static-top .container,
+.navbar-fixed-top .container,
+.navbar-fixed-bottom .container {
+  width: 1200px;
+}
+.span3 {
+  width: 320px;
+}
+.span9 {
+  width: 860px;
+}
+.well {
+  border: none;
+  -webkit-border-radius: 0;
+     -moz-border-radius: 0;
+          border-radius: 0;
+}
+.form-search > ul.nav > li.module {
+  background-color: #f0f0f0;
+}
+.form-search .well .nav-header {
+  padding: 8px 1px;
+}
+[class^="icon-"],
+[class*=" icon-"] {
+  display: none;
+}

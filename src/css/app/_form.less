@@ -1,0 +1,325 @@
+﻿
+@import "../_variables.less";
+@import "_mixins.less";
+
+@form-control: #51565a;
+@form-placeholder: #aeb0b2;
+
+form {
+	background: white;
+}
+
+select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
+	&.form-control {
+		background-color: transparent;
+		background-image: none;
+		border: 0;
+		border-bottom: 2px solid @form-placeholder;
+		border-radius: 0;
+		-webkit-box-shadow: none;
+		box-shadow: none;
+		color: @form-control;
+		font-size: 25px;
+		line-height: 30px;
+		height: 50px;
+		padding: 7px;
+		margin: 0;
+		.transition-transform();
+
+		&:focus {
+			border-color: transparent;
+			border-bottom-color: @form-placeholder;
+			outline: 0;
+			-webkit-box-shadow: none;
+			box-shadow: none;
+		}
+
+		&[disabled],
+		fieldset[disabled] & {
+			// background-color: #eee;
+			background-color: transparent;
+			color: rgba(0,0,0,0.2);
+		}
+
+		&[readonly] {
+			background-color: transparent;
+			color: rgba(0,0,0,0.2);
+		}
+
+		-webkit-appearance:none!important;
+
+	}
+}
+
+.control-label {
+    display: block;
+    position: relative;
+    text-align: left;
+    text-indent: 7px;
+    font-size: 20px;
+    font-weight: 400;
+    margin: 0;
+    color: @form-control;
+    background: white;
+    z-index: 10;
+    pointer-events: none;
+    .transform(translateY(40px));
+    .transition-transform();
+}
+
+.form-group {
+    margin-bottom: 0;
+
+    ::-webkit-input-placeholder {
+        color: transparent !important;
+        .transition();
+    }
+
+    :focus::-webkit-input-placeholder {
+        color: @form-placeholder !important;
+        .transition();
+    }
+
+    :-moz-placeholder {
+        color: transparent !important;
+        .transition();
+    }
+
+    ::-moz-placeholder {
+        color: transparent !important;
+        .transition();
+    }
+
+    :-ms-input-placeholder {
+        color: transparent !important;
+        .transition();
+    }
+
+    .form-control {
+        color: @form-control;
+    }
+
+    &.focus:not(.readonly), &.success:not(.empty), &.error:not(.empty) {
+        & .form-control {
+            color: @form-control;
+            border-bottom-color: @form-placeholder;
+        }
+        & .control-label {
+            .transform(translateY(10px));
+            color: @form-placeholder;
+        }
+    }
+
+    &.success:not(.empty) {
+        & .form-control {
+            color: @form-control;
+            border-bottom-color: @brand-success;
+        }
+        & .control-label {
+            color: @form-placeholder;
+        }
+    }
+
+    &.error:not(.empty),
+    &.error.empty {
+        & .form-control {
+            color: @brand-danger;
+            border-bottom-color: @brand-danger;
+        }
+        & .control-label {
+            color: @brand-danger;
+        }
+    }
+}
+
+[ng-messages] {
+    display: inline-block;
+    font-size: 20px;
+    font-weight: 400;
+    float: right;
+    color: @brand-danger;
+}
+
+.preview {
+    width: 100%;
+    height: 100%;
+    background: no-repeat center;
+    background-size: cover;
+    background-color: #ececec;
+}
+
+[control-autocomplete] {
+    position: relative;
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        text-align: left;
+        position: absolute;
+        z-index: 100;
+        background: white;
+        width: 100%;
+
+        & > li {
+            padding: 10px 8px;
+            font-size: 16px;
+            cursor: pointer;
+            .transition();
+
+            &:hover, &.active {
+                background: #f0f0f0;
+            }
+
+            .token {
+                font-weight: 900;
+            }
+        }
+    }
+}
+
+.checkbox {
+    display: table;
+    position: relative;
+    width: 100%;
+    height: 60px;
+    margin-bottom: 20px;
+
+    @switch-size: 30px;
+    @switch-color-off: @brand-primary;
+
+    .checkbox-label {
+        display: table-cell;
+        position: relative;
+        width: auto;
+        vertical-align: middle;
+
+        text-align: left;
+        text-indent: 7px;
+        font-size: 20px;
+        font-weight: 400;
+        margin: 0;
+        color: @brand-primary;
+        background: white;
+        pointer-events: none;
+    }
+
+    .switch {
+        display: table-cell;
+        position: relative;
+        width: @switch-size * 2;
+        vertical-align: middle;
+
+        .toggle {
+            position: absolute;
+            margin-left: -9999px;
+            visibility: hidden;
+        }
+        .toggle + label {
+            display: block;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            pointer-events: normal;
+            .unselectable();
+        }
+
+        // SWITCH 1 - ROUND
+        input.toggle-round {
+            + label {
+                padding: 2px;
+                width: @switch-size * 2;
+                height: @switch-size;
+                background-color: @switch-color-off;
+                .border-radius(@switch-size);
+
+                &:before, &:after {
+                    display: block;
+                    position: absolute;
+                    top: 1px;
+                    left: 1px;
+                    bottom: 1px;
+                    content: "";
+                }
+
+                &:before {
+                    right: 1px;
+                    background-color: #f1f1f1;
+                    .border-radius(@switch-size);
+                    .transition(background; 250ms);
+                }
+
+                &:after {
+                    width: @switch-size - 2px;
+                    background-color: white;
+                    .border-radius(100%);
+                    .box-shadow(0 2px 5px rgba(0, 0, 0, 0.3));
+                    .transition(margin; 250ms);
+                }
+            }
+
+            &:checked {
+                + label {
+                    &:before {
+                        background-color: @brand-success;
+                    }
+                    &:after {
+                        margin-left: @switch-size;
+                    }
+                }
+            }
+        }
+        // SWITCH 2 - ROUND FLAT
+        @switch-flat-outer: 1px;
+        @switch-flat-inner: 4px;
+
+        input.toggle-round-flat {
+
+            + label {
+                padding: 2px;
+                width: @switch-size * 2;
+                height: @switch-size;
+                background-color: @switch-color-off;
+                .border-radius(@switch-size);
+                .transition(background; 250ms);
+
+                &:before, &:after {
+                    display: block;
+                    position: absolute;
+                    content: "";
+                }
+
+                &:before {
+                    top: @switch-flat-outer;
+                    left: @switch-flat-outer;
+                    bottom: @switch-flat-outer;
+                    right: @switch-flat-outer;
+                    background-color: white;
+                    .border-radius(@switch-size);
+                    .transition(background; 250ms);
+                }
+
+                &:after {
+                    top: @switch-flat-inner;
+                    left: @switch-flat-inner;
+                    bottom: @switch-flat-inner;
+                    width: @switch-size - @switch-flat-inner * 2;
+                    background-color: @switch-color-off;
+                    .border-radius(@switch-size - @switch-flat-inner * 2);
+                    .transition(margin, background; 250ms);
+                }
+            }
+
+            &:checked {
+                + label {
+                    background-color: @brand-success;
+                    &:after {
+                        margin-left: @switch-size;
+                        background-color: @brand-success;
+                    }
+                }
+            }
+        }
+    }
+}
+

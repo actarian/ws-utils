@@ -1,0 +1,77 @@
+
+<div class="inner dish">
+    <section class="vertical header">
+        <div class="inner left">
+            <button type="button" class="btn btn-icon animated" animate="bounceIn" delay="300" ng-click="goStream()"><i class="icon-back"></i></button>
+        </div>
+        <div class="inner center">
+            <span ng-bind="item.name"></span>
+        </div>
+        <div class="inner right">
+            <span class="user" animate="bounceIn" delay="1000">                
+                <span class="picture" style="{{Users.currentUser().backgroundPicture()}}" ng-click="goUser(Users.currentUser().route)"></span>
+            </span>               
+        </div>
+    </section>
+    <section class="scrollable content" scrollable>
+        <div class="inner">
+            <div class="card">
+                <div class="card-media aspect ratio2x1">
+                    <img src="" ng-img="getPictures(item)" class="inner" />
+                </div>
+                <div class="card-content">
+                    <div class="card-headline h5">
+                        <div class="left">
+                            <b class="text-strong" ng-bind="item.name"></b>  
+                            <span class="price" ng-bind="item.price | currency : '€'"></span>
+                        </div>
+                        <div class="right">
+                            <b class="rating" ng-bind="item.ratingToString()"></b>                         
+                        </div>
+                    </div>                                        
+                    <div class="card-info">
+                        <b ng-repeat="category in item.categories" ng-click="goCategory(category.id)"><span ng-bind="category.name"></span>{{$last ? "" : ", "}}</b>
+                        <span class="pull-right" ng-bind="item.created | relativeDate"></span>
+                    </div>                                
+                    <div class="card-divline">
+                        <div class="rating" style="transform:scale({{item.rating()}}, 1);"></div>
+                    </div>
+                    <div class="card-body">
+                        <div class="left">
+                            <span class="user" ng-click="goUser(item.user.route)">
+                                <span class="picture" style="{{item.user.backgroundPicture()}}"></span>
+                                <span class="name" ng-bind="item.user.userName"></span>
+                            </span>                         
+                        </div>
+                        <div class="right">                                                          
+                            <i class="icon-vegan-friendly" ng-if="item.isVeganFriendly" title="is vegan friendly"></i>
+                            <button type="button" ng-click="item.like(true)" ng-class="{ active: item.vote.like === true }" on-tap class="btn btn-vote btn-upvote" title="vote up"><i class="icon-upvote"></i><span ng-bind="item.yes"></span></button>
+                            <button type="button" ng-click="item.like(false)" ng-class="{ active: item.vote.like === false }"  on-tap class="btn btn-vote btn-downvote" title="vote down"><span ng-bind="item.no"></span><i class="icon-downvote"></i></button>                         
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid votes">                
+                <p ng-switch="item.votes.length">
+                    <span ng-switch-when="0">Not rated yet</span>
+                    <span ng-switch-default>Voted by</span>
+                </p>
+                <span class="user" ng-click="goUser(vote.user.route)" ng-repeat="vote in item.votes">
+                    <span class="picture" style="{{vote.user.backgroundPicture()}}"></span>
+                </span>     
+            </div>
+            <div class="container-fluid">
+                <p>
+                    Pictures from users    
+                </p>
+                <div class="row">
+                    <div class="col-xs-4" ng-repeat="picture in item.pictures">                    
+                        <div class="card-media aspect ratio2x1">
+                            <img src="" ng-img="getPicture(picture, 'sm')" class="inner" />
+                        </div>      
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

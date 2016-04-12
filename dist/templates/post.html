@@ -1,0 +1,41 @@
+﻿<div class="inner add-dish">
+    <section class="vertical header">
+        <div class="inner left">
+            <button type="button" class="btn btn-icon animated" animate="bounceIn" delay="300" ng-click="goStream()"><i class="icon-back"></i></button>
+        </div>
+        <div class="inner center">
+            <span>Add Dish</span>
+        </div>
+        <div class="inner right">
+            <span class="user" animate="bounceIn" delay="1000">                
+                <span class="picture" style="{{Users.currentUser().backgroundPicture()}}" ng-click="goUser(Users.currentUser().route)"></span>
+            </span>               
+        </div>
+    </section>
+    <section class="scrollable content" scrollable>
+        <div class="inner">                
+            <form name="postForm" role="form" novalidate autocomplete="off" ng-submit="!postFormBusy && postForm.$valid && hasPicture() && submitPost()">
+                <div class="preview animated" ng-class="{ pulse: pictureError }" animate="bounceIn" delay="10">
+                    <div class="aspect ratio2x1" ng-class="{ success: model.pictureBase64 }" ngf-select="onUploadFileSelected($file, $newFiles)" ngf-capture="'camera'" ngf-accept="'image/*'" ngf-fix-orientation="true" ngf-no-object-url="true" ngf-resize="{width: 750, height: 375, quality: 0.9, type:'image/jpeg', centerCrop: true}" title="Add or change picture">
+                        <img ngf-background="model.pictureBase64 || 'img/preview.png'" class="inner preview">
+                    </div>
+                </div>            
+                <div class="container-fluid">
+                    <div class="row" animate="fadeInUp" delay="300">
+                        <div class="form-group col-xs-12" form="postForm" control="autocomplete" title="dish name" placeholder="type the name of the dish" model="model.dish.name" source="dishesAutocomplete" label="name" key="name" flatten="true" can-create="true" queryable="true" required="true" on-selected="onDishSelected($item)"></div>
+                        <div class="form-group col-xs-12" form="postForm" control="select" title="category" placeholder="select a category" model="model.dish.categories[0]" source="categories" required="true"></div>
+                        <div class="form-group col-xs-12" form="postForm" control="number" title="dish price" placeholder="type the price of the dish" model="model.dish.price" required="true"></div>
+                        <div class="form-group col-xs-12" form="postForm" control="checkbox" title="is vegan friendly" placeholder="please check if the dish is vegan friendly" model="model.dish.isVeganFriendly"></div>
+                    </div>
+                    <div class="row" animate="fadeInUp" delay="600">
+                        <div class="col-xs-12">
+                            <p class="bg-danger" style="padding:10px;" ng-if="postFormError" ng-bind="postFormError"></p>
+                            <button type="submit" on-tap ng-class="{ busy: postFormBusy }" class="btn btn-secondary btn-block"><span ng-if="!postFormBusy">ADD DISH</span><span ng-if="postFormBusy">ADDING</span></button>
+                        </div>
+                    </div>
+                    <div class="spacer"></div>
+                </div>            
+            </form>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,9 @@
+{
+    "name": "ws-utils",
+    "version": "0.0.1",
+    "homepage": "",
+    "license": "MIT",
+    "private": true,
+    "dependencies": {
+    }
+}

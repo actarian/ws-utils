@@ -1,0 +1,63 @@
+<h1><code ng:non-bindable="">controlAutocomplete</code>
+<div><span class="hint"></span>
+</div>
+</h1>
+<div><h2 id="description">Description</h2>
+<div class="description"><div class="controlautocomplete-page"><p>Custom control type with autocomplete functionality. (use the shortcut version with control directive)</p>
+</div></div>
+<h2 id="dependencies">Dependencies</h2>
+<ul class="dependencies"><li><code ng:non-bindable=""><a href="#/api/ngModel">ngModel</a></code>
+</li>
+</ul>
+<h2 id="usage">Usage</h2>
+<div class="usage">as attribute<pre class="prettyprint linenums">&lt;ANY control-autocomplete="{service}"
+     model="{model}"
+     can-create="{boolean}"
+     flatten="{boolean}"
+     queryable="{boolean}"
+     key="{string}"
+     label="{string}"&gt;
+   ...
+&lt;/ANY&gt;</pre>
+<h4 id="usage_parameters">Parameters</h4><table class="variables-matrix table table-bordered table-striped"><thead><tr><th>Param</th><th>Type</th><th>Details</th></tr></thead><tbody><tr><td>controlAutocomplete</td><td><a href="" class="label type-hint type-hint-service">service</a></td><td><div class="controlautocomplete-page"><p>the datasource service</p>
+</div></td></tr><tr><td>model</td><td><a href="" class="label type-hint type-hint-model">model</a></td><td><div class="controlautocomplete-page"><p>the target model of control</p>
+</div></td></tr><tr><td>canCreate</td><td><a href="" class="label type-hint type-hint-boolean">boolean</a></td><td><div class="controlautocomplete-page"><p>setted on true the control can add new entities</p>
+</div> <p><em>(default: false)</em></p></td></tr><tr><td>flatten</td><td><a href="" class="label type-hint type-hint-boolean">boolean</a></td><td><div class="controlautocomplete-page"><p>set to true to flat the value to the model</p>
+</div> <p><em>(default: false)</em></p></td></tr><tr><td>queryable</td><td><a href="" class="label type-hint type-hint-boolean">boolean</a></td><td><div class="controlautocomplete-page"><p>set to true if is a queryable service</p>
+</div> <p><em>(default: false)</em></p></td></tr><tr><td>key</td><td><a href="" class="label type-hint type-hint-string">string</a></td><td><div class="controlautocomplete-page"><p>optional key for select option</p>
+</div> <p><em>(default: id)</em></p></td></tr><tr><td>label</td><td><a href="" class="label type-hint type-hint-string">string</a></td><td><div class="controlautocomplete-page"><p>optional label for select option</p>
+</div> <p><em>(default: name)</em></p></td></tr></tbody></table></div>
+<h2 id="example">Example</h2>
+<div class="example"><div class="controlautocomplete-page"><h4 id="example_source">Source</h4>
+<div source-edit="examples" source-edit-deps="angular.js script.js" source-edit-html="index.html-6" source-edit-css="" source-edit-js="script.js-7" source-edit-json="" source-edit-unit="" source-edit-scenario=""></div>
+<div class="tabbable"><div class="tab-pane" title="index.html">
+<pre class="prettyprint linenums" ng-set-text="index.html-6" ng-html-wrap-loaded="examples angular.js script.js"></pre>
+<script type="text/ng-template" id="index.html-6">
+   <div class="container-fluid">
+      <div class="row">
+         <form name="myForm">
+            <div class="form-group col-xs-12 empty focus">
+               <label for="dishname" class="control-label">dish name<span ng-messages="(myForm.$submitted || myForm.dishname.$touched) &amp;&amp; myForm.dishname.$error" role="alert" class="ng-inactive"></span></label>
+               <input name="dishname" ng-model="model.name" type="hidden" required="">
+               <div control-autocomplete="dishesAutocomplete" model="model.name" label="name" key="name" can-create="true" flatten="true" queryable="false" placeholder="type the name of the dish" on-focus="myForm.dishname.hasFocus=true" on-blur="myForm.dishname.hasFocus=false" on-selected="onDishSelected($item)" class="ng-isolate-scope"></div>
+         </form>
+      </div>
+   </div>
+</script>
+</div>
+<div class="tab-pane" title="script.js">
+<pre class="prettyprint linenums" ng-set-text="script.js-7"></pre>
+<script type="text/ng-template" id="script.js-7">
+   angular.module('examples', ['wsUtils']);
+   angular.run(['$rootScope', '$q', function($rootScope, $q) {
+      $rootScope.dishesAutocomplete = ;
+      $rootScope.onDishSelected = function($item) {
+         alert($item);
+      };
+   }]);
+</script>
+</div>
+</div><h4 id="example_demo">Demo</h4>
+<div class="well doc-example-live animate-container" ng-embed-app="examples" ng-set-html="index.html-6" ng-eval-javascript="script.js-7"></div>
+</div></div>
+</div>

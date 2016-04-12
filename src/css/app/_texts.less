@@ -1,0 +1,61 @@
+﻿
+@import "../_variables.less";
+@import "_mixins.less";
+
+.text-sans {
+    font-family: @font-family-sans-serif;
+}
+
+.text-serif {
+    font-family: @font-family-serif;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+.text-center-xs {
+    @media screen {
+        @media (max-width: 767px) {
+            text-align: center;
+        }
+    }
+}
+.text-center-sm {
+    @media screen {
+        @media (max-width: 1199px) {
+            text-align: center;
+        }
+    }
+}
+
+.text-strong {
+    font-weight: 700;
+}
+
+.text-uppercase {
+    text-transform: uppercase;    
+    letter-spacing: 1px;
+}
+
+.text-lowercase {
+    text-transform: lowercase;
+}
+
+.text-overflow {
+    overflow: hidden;
+    -ms-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+}
+
+.text-danger {
+    color: @brand-primary;
+}
+
+.icon-lg {
+    font-size: 30px;
+}

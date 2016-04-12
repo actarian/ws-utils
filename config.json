@@ -1,0 +1,41 @@
+{
+    "name": "ws-utils",
+    "paths": {
+        "node": "./node_modules",
+        "bower": "./bower_components",
+        "src": "./src",
+        "root": "./dist"
+    },
+    "folders": {
+        "css": "/css",
+        "js": "/js"
+    },
+    "bundles": {
+        "css": [],
+        "js": [{
+            "src": [
+                "./src/js/app.js",
+                "./src/js/animations/animations.js",
+                "./src/js/directives/directives.js",
+                "./src/js/models/models.js",
+                "./src/js/services/services.js",
+                "./src/js/controllers/controllers.js"
+            ],
+            "folder": "./dist/js/ws-utils",
+            "dist": "./dist/js/ws-utils.js"
+        }, {
+            "src": [
+                "./src/js/workers/http.js",
+                "./src/js/workers/loader.js"
+            ],
+            "folder": "./dist/js/ws-utils/workers"
+        }]
+    },
+    "browserlist": [
+        "> 0%"
+    ],
+    "server": {
+        "name": "localhost",
+        "port": 8787
+    }
+}

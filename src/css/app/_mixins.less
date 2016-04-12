@@ -1,0 +1,234 @@
+﻿
+// @import "mixins/_gradients.less";
+
+.inner(@padding: 40px;) {
+    padding-left: @padding;
+    padding-right: @padding;
+}
+.outer(@padding: 40px;) {
+    margin-left: -@padding;
+    margin-right: -@padding;
+}
+
+.clearfix() {
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+.unselectable() {
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.border-radius(@radius: 3px;) {
+    -webkit-border-radius: @radius;
+    -moz-border-radius: @radius;
+    -ms-border-radius: @radius;
+    -o-border-radius: @radius;
+    border-radius: @radius;
+}
+
+.box-shadow(@shadow: 0 2px 4px rgba(0,0,0,0.25);) {
+    box-shadow: @shadow;
+}
+
+.opacity(@opacity) {
+    opacity: @opacity;
+    @opacity-ie: (@opacity * 100);
+    filter: ~"alpha(opacity=@{opacity-ie})";
+}
+
+.transitionfix() {
+    -moz-backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-transform: translate3d(0, 0, 0);
+    -moz-transform: translate3d(0, 0, 0);
+    -ms-transform: translate3d(0, 0, 0);
+    -o-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+}
+
+.transition(@properties: all; @duration: 250ms; @delay: 0ms; @effect: ease-in-out;) {
+    -moz-transition-property: @properties;
+    -o-transition-property: @properties;
+    -webkit-transition-property: @properties;
+    transition-property: @properties;
+    -moz-transition-duration: @duration;
+    -o-transition-duration: @duration;
+    -webkit-transition-duration: @duration;
+    transition-duration: @duration; 
+    -moz-transition-delay: @delay;
+    -o-transition-delay: @delay;
+    -webkit-transition-delay: @delay;
+    transition-delay: @delay;
+    -moz-transition-timing-function: @effect;
+    -o-transition-timing-function: @effect;
+    -webkit-transition-timing-function: @effect;
+    transition-timing-function: @effect;
+}
+
+.transition-transform(@properties: all; @duration: 250ms; @delay: 0ms; @effect: ease-in-out;) {
+    -moz-transition-property: -moz-transform, @properties;
+    -o-transition-property: -o-transform, @properties;
+    -webkit-transition-property: -webkit-transform, @properties;
+    transition-property: transform, @properties;
+    -moz-transition-duration: @duration;
+    -o-transition-duration: @duration;
+    -webkit-transition-duration: @duration;
+    transition-duration: @duration;
+    -moz-transition-delay: @delay;
+    -o-transition-delay: @delay;
+    -webkit-transition-delay: @delay;
+    transition-delay: @delay;
+    -moz-transition-timing-function: @effect;
+    -o-transition-timing-function: @effect;
+    -webkit-transition-timing-function: @effect;
+    transition-timing-function: @effect;
+    -webkit-transform-style: preserve-3d; /* Chrome, Safari, Opera */
+    transform-style: preserve-3d;
+}
+
+.transform-origin(@properties;) {
+  -moz-transform-origin: @properties;
+  -ms-transform-origin: @properties;
+  -o-transform-origin: @properties;
+  -webkit-transform-origin: @properties;
+  transform-origin: @properties;
+}
+
+.transform(@properties;) {
+    -moz-transform: @properties;
+    -ms-transform: @properties;
+    -o-transform: @properties;
+    -webkit-transform: @properties;
+    transform: @properties;
+}
+
+.text-overflow() {
+    overflow: hidden;
+    -ms-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-select(@select) {
+  -webkit-user-select: @select;
+     -moz-user-select: @select;
+      -ms-user-select: @select; // IE10+
+          user-select: @select;
+}
+
+.tab-focus() {
+  outline: none;
+  /*
+  // Default
+  outline: thin dotted;
+  // WebKit
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+  */
+}
+
+.button-size(@padding-vertical: 15px; @padding-horizontal: 15px; @font-size: inherit; @line-height: 1em; @border-radius: 0;) {
+  padding: @padding-vertical @padding-horizontal;
+  font-size: @font-size;
+  line-height: @line-height;
+  border-radius: @border-radius;
+}
+
+.btn(@weight: 300) {
+    display: inline-block;
+    margin-bottom: 0;
+    font-weight: @weight;
+    text-align: center;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    .button-size();
+    .user-select(none);
+
+    &,
+    &:active,
+    &.active {
+        &:focus,
+        &.focus {
+            .tab-focus();
+        }
+    }
+
+    &:hover,
+    &:focus,
+    &.focus {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    &:active,
+    &.active {
+        outline: 0;
+        background-image: none;
+    }
+
+    &.disabled,
+    &[disabled],
+    fieldset[disabled] & {
+        cursor: default;
+        pointer-events: none;
+        .opacity(.3);
+    }
+}
+
+.button-variant(@color; @background; @border; @color-active: @color; @background-active: darken(@background, 10%); @border-active: darken(@border, 12%);) {
+  color: @color;
+  background-color: @background;
+  border-color: @border;
+
+  &:hover,
+  &:focus,
+  &.focus,
+  &:active,
+  &.active,
+  .open > .dropdown-toggle& {
+    color: @color-active;
+    background-color: @background-active;
+        border-color: @border-active;
+  }
+  &:active,
+  &.active,
+  .open > .dropdown-toggle& {
+    background-image: none;
+  }
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    &,
+    &:hover,
+    &:focus,
+    &.focus,
+    &:active,
+    &.active {
+      background-color: @background;
+          border-color: @border;
+    }
+  }
+
+  .badge {
+    color: @background;
+    background-color: @color;
+  }  
+}
